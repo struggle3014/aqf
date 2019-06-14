@@ -4,31 +4,28 @@ import numpy as np
 from datetime import datetime
 import tushare as ts
 from dateutil.parser import parse
-from aqf.utils import tushare_util
+from com.xiumei.utils import tushare_util
 
 """
 金融时间序列数据处理
 """
 
-"""
-1 python 时间格式处理
-1.1 Datetime 数据及转换
-1.2 时间转字符串
-1.3 字符串转日期
-"""
-"""
-1.1 python 下的日期格式——Datetime 数据及转换
-"""
+
 def python_data_trans():
+    """
+    1.1 python 下的日期格式——Datetime 数据及转换
+    :return:
+    """
     now = datetime.now()  # datetime.datetime
     print('{}月{}月{}日'.format(now.year, now.month, now.day))
     print(datetime.now() - datetime(2017, 8, 19))
 
 
-"""
-1.2 python 下时间转日期
-"""
 def time2str():
+    """
+    1.2 python 下时间转日期
+    :return:
+    """
     dt_time = datetime(2019, 6, 18)
     # 1- str(datetime.datetime)
     str_time1 = str(dt_time)
@@ -36,10 +33,11 @@ def time2str():
     str_time2 = dt_time.strftime('%d/%m/%Y')
 
 
-"""
-1.3 python 字符串转换为 datetime 格式
-"""
 def str2time():
+    """
+    1.3 python 字符串转换为 datetime 格式
+    :return:
+    """
     dt_str1 = '2019-06-08'
     # 1- datetime.strptime('str', 'format')
     dt_time1 = datetime.strptime(dt_str1, '%Y-%m-%d')
@@ -50,13 +48,14 @@ def str2time():
     print(dt_time2)
 
 
-"""
-2 pandas 下的 time 使用
-2.1 timestamp: pandas 最基本的时间格式是 TimeStamp，使用 .to_datetime() 转换为 datetime。
-2.2 DatetimeIndex: pandas 下的时间索引格式。
-2.3 Period: 时期（period）指的是一段时间。
-"""
 def pandas_time():
+    """
+    2 pandas 下的 time 使用
+    2.1 timestamp: pandas 最基本的时间格式是 TimeStamp，使用 .to_datetime() 转换为 datetime。
+    2.2 DatetimeIndex: pandas 下的时间索引格式。
+    2.3 Period: 时期（period）指的是一段时间。
+    :return:
+    """
     # 1- pd.to_datetime(pandas.core.series.Series)，Series 向量化将字符串转为 datetime。
     str_time = pd.Series(['2017/06/18', '2017/06/19', '2017-06-20', '2017-06-21'], name='Course_time')
     # print(type(str_time))
@@ -114,13 +113,14 @@ def pandas_time():
     print(data['2018-02-01'])
 
 
-"""
-3 时间序列数据处理
-3.1 时间数据的聚合
-3.2 时间数据的频率转换
-3.3 数据频率转换应用
-"""
 def time_series_process():
+    """
+    3 时间序列数据处理
+    3.1 时间数据的聚合
+    3.2 时间数据的频率转换
+    3.3 数据频率转换应用
+    :return:
+    """
     # 1- 时间序列数据前后移动
     data = tushare_util.get_single_stock_data('000001', '2018-01-01', '2019-01-01')
     close_price = data['close']
@@ -144,13 +144,16 @@ def time_series_process():
 
     # 2.2- 时间数据的频率转换
     sample = cum_return[1:3]
-    print(sample)
+    # print(sample)
     sample_by_hour = sample.resample('H')
-    print(sample_by_hour.size())
+    # print(sample_by_hour.size())
     # print(sample_by_hour.head())
 
     # 2.3- 数据频率转换应用实战
-    tushare_util.get_single_stock_data()
+    df = tushare_util.get_tick_data('600848', date='2018-12-12', src='tt')
+    # df = ts.get_tick_data('600848', date='2018-12-12', src='tt')
+    print(df.head(5))
+    print(df.info())
 
 
 if __name__ == '__main__':
