@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime
 import tushare as ts
 from dateutil.parser import parse
-from com.xiumei.utils import tushare_util
+from aqf.com.xiumei.utils import tushare_util
 
 """
 金融时间序列数据处理
@@ -149,11 +149,19 @@ def time_series_process():
     # print(sample_by_hour.size())
     # print(sample_by_hour.head())
 
-    # 2.3- 数据频率转换应用实战
-    df = tushare_util.get_tick_data('600848', date='2018-12-12', src='tt')
+    # 2.3- 数据频率转换应用实战应用
+    df = tushare_util.get_tick_data('600848', date='2019-06-14', src='tt')
     # df = ts.get_tick_data('600848', date='2018-12-12', src='tt')
-    print(df.head(5))
+    print(df.head(10))
     print(df.info())
+
+    data_5m = df.resample('5T')
+    print(type(data_5m))
+    # print(data_5m.first())
+    print(data_5m.sum())
+    # 1分钟内的开盘价、收盘价、最高价、最低价
+    data_m = df['price'].resample('T', how='ohlc')
+    print(data_m)
 
 
 if __name__ == '__main__':
