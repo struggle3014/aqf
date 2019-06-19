@@ -4,7 +4,6 @@ import numpy as np
 import tushare as ts
 import matplotlib.pyplot as plt
 plt.style.use('seaborn')
-from aqf.com.xiumei.utils import tushare_util
 
 
 """
@@ -65,8 +64,42 @@ def pair_trading_enhanced_strategy():
     增强的配对交易-考虑时间序列平稳性
     :return:
     """
-    
+    stocks_pair = ['600199', '600702']
+    data1 = ts.get_k_data('600199', '2018-06-01', '2019-06-19')[['date', 'close']]
+    data2 = ts.get_k_data('600702', '2018-06-01', '2019-06-19')['close']
+    data = pd.concat([data1, data2], axis=1)
+    data.set_index('date', inplace=True)
+    data.columns = stocks_pair
+    # data.plot(figsize=(8, 6))
+    # plt.show()
+
+    # 2- 策略开发思路
+    # 数据间的协整性
+    print(data.corr())
+    # plt.figure(figsize=(10, 8))
+    # plt.title('Stock Correlation')
+    # plt.plot(data['600199'], data['600702'], '.')
+    # plt.xlabel('600199')
+    # plt.ylabel('600702')
+    # data.dropna(inplace=True)
+    # plt.show()
+
+    # 线性回归，其中 slope 为斜率，intercept 为截距
+    # print(data.head())
+    tt = np.polyfit(data.iloc[:, 0], data.iloc[:, 1], 1)
+    print(tt)
+    [slope, intercept] = np.polyfit(data.iloc[:, 0], data.iloc[:, 1], 1)
+    print(slope)
+    print(intercept)
+    # 计算两者间的价差
+    data['spread'] = data.iloc[:, 1] - (data.iloc[:, 0] * slope + intercept)
+    data['spread'].plot(figsize=(10, 8), title='Price Spread')
+    plt.show()
+
+    # 计算价差与价差均值之间的方差
+    data['zscore'] = (data['spread'] - data['spread'].mean()) / data['spread'].std()
 
 
 if __name__ == '__main__':
-    pair_trading_strategy()
+    # pair_trading_strategy()
+    pair_trading_enhanced_strategy()
