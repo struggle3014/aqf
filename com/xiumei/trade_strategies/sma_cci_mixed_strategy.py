@@ -29,18 +29,18 @@ def sma_cci_mixed_strategy():
     # 计算指标 sma，cci
     data['sma'] = ta.SMA(np.asarray(data['close']), 5)
     data['cci'] = ta.CCI(np.asarray(data['high']), np.asarray(data['low']), np.asarray(data['close']), timeperiod=20)
-    # # 画图
-    plt.subplot(2, 1, 1)
-    plt.title('沪深300 sma cci 指标图')
-    # 不显示横坐标
-    plt.gca().axes.get_xaxis().set_visible(False)
-    data['close'].plot(figsize=(10, 8))
-    data['sma'].plot(figsize=(10, 8))
-    plt.legend()
-    plt.subplot(2, 1, 2)
-    data['cci'].plot(figsize=(10, 8))
-    plt.legend()
-    plt.show()
+    # 画图
+    # plt.subplot(2, 1, 1)
+    # plt.title('沪深300 sma cci 指标图')
+    # # 不显示横坐标
+    # plt.gca().axes.get_xaxis().set_visible(False)
+    # data['close'].plot(figsize=(10, 8))
+    # data['sma'].plot(figsize=(10, 8))
+    # plt.legend()
+    # plt.subplot(2, 1, 2)
+    # data['cci'].plot(figsize=(10, 8))
+    # plt.legend()
+    # plt.show()
 
     # 2- 交易信号、持仓信号和策略逻辑
     # 2.1- 交易信号
@@ -57,7 +57,7 @@ def sma_cci_mixed_strategy():
                                                  data['yes_close'] > data['yes_sma']), 1, 0)
     # sma开空信号：昨天股价下穿SMA
     data['sma_signal'] = np.where(np.logical_and(data['daybeforeyes_close'] > data['daybeforeyes_sma'],
-                                                 data['yes_close'] < data['yes_sma']), 1, 0)
+                                                 data['yes_close'] < data['yes_sma']), -1, data['sma_signal'])
     # 产生cci做多过滤信号
     data['cci_filter'] = np.where(data['yes_cci'] < -100, 1, 0)
     # 产生cci做空过滤信号
@@ -66,6 +66,23 @@ def sma_cci_mixed_strategy():
     data['filtered_signal'] = np.where(data['sma_signal'] + data['cci_filter'] == 2, 1, 0)
     # 过滤后的开空信号
     data['filtered_signal'] = np.where(data['sma_signal']+data['cci_filter'] == -2, -1, data['filtered_signal'])
+
+    print(data.tail())
+    # 绘制 cci，sma 指标图
+    # 绘制cci，sma指标图
+    # plt.subplot(3, 1, 1)
+    # plt.title('沪深300 CCI SMA指标图')
+    # plt.gca().axes.get_xaxis().set_visible(False)
+    # data['close'].plot(figsize=(12, 8))
+    # data['sma'].plot()
+    # plt.legend(loc='upper left')
+    # plt.subplot(3, 1, 2)
+    # data['cci'].plot(figsize=(12, 8))
+    # plt.legend(loc='upper left')
+    # plt.subplot(3, 1, 3)
+    # data['filtered_signal'].plot(figsize=(12, 12), marker='o', linestyle='')
+    # plt.legend(loc='upper left')
+    # plt.show()
 
     # 2.2- 持仓信号
     # 记录持仓情况，默认为0
@@ -95,7 +112,7 @@ def sma_cci_mixed_strategy():
     # plt.legend()
     # plt.gca().axes.get_xaxis().set_visible(False)
     # plt.subplot(3, 1, 3)
-    # data['position'].plot(marker='o', figsize=(12, 12), linestyle='')
+    # data['position'].plot(marker='o', figsize=(10, 16), linestyle='')
     # plt.legend()
     # plt.show()
     
@@ -109,6 +126,12 @@ def sma_cci_mixed_strategy():
     data['return'] = (data['pct_change'] + 1).cumprod()
     # 计算策略累积收益率
     data['strategy_cum_return'] = (1 + data['strategy_return']).cumprod()
+
+    # 将股票累计收益和策略累计收益绘图
+    data[['return', 'strategy_cum_return']].plot(figsize=(12, 6))
+    plt.title('600030 CCI收益图')
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':
