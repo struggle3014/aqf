@@ -1,4 +1,5 @@
 # -*- coding=utf-8 -*-
+from aqf.com.xiumei.utils import tushare_util
 import pandas as pd
 import numpy as np
 import tushare as ts
@@ -7,7 +8,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 plt.style.use('seaborn')
 mpl.style.use('ggplot')
-from aqf.com.xiumei.utils import tushare_util
 # 确保‘-’号显示正常
 mpl.rcParams['axes.unicode_minus']=False
 # 确保中文显示正常
@@ -35,7 +35,7 @@ def hammer_strategy():
 
     # 1- 收集并计算所需数据
     data = tushare_util.get_single_stock_data(code, start_date, end_date)
-    print(data.head())
+    data.reset_index(inplace=True)
     data['pct_change'] = data['close'].pct_change()
     data['ma'] = data['close'].rolling(length).mean()
     data['std'] = data['close'].rolling(length).std()
@@ -56,12 +56,16 @@ def hammer_strategy():
     data['tail_cond'] = np.where(data['body'] == 0, True,
                                  (data['tail'] / data['body']) > tail_size)  # 下影线要比实体的两倍更长才满足条件
 
+    print(data.tail(15)[['date', 'head', 'body', 'open', 'tail', 'body_cond', 'head_cond', 'tail_cond']])
+
     # 判断 K 线是否符合锤子线
     data['hammer'] = data[['head_cond', 'body_cond', 'tail_cond']].all(axis=1) # 同时满足上述三个条件才是锤子 K 线
     # 由于实盘当天中的日线级别参考指标未生成，因根据昨日是否满足锤子形态要求作为开仓信号
     data['yes_hammer'] = data['hammer'].shift(1)
 
-    print(data[data['hammer']].tail(10))
+    print(data[data['hammer']][['date', 'hammer']].tail(15))
+
+    # print(data[data['hammer']].tail(10))
 
     # 3- 编写交易逻辑——循环法
     flag = 0  # 持仓记录，1代码有仓位，0代表空仓；
