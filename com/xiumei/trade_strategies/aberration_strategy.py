@@ -25,19 +25,22 @@ def aberration_strategy():
     :return:
     """
     # 1- 数据获取
-    code = '002397'
+    # code = '002397'
+    code = '600036'
     start_date = '2012-01-01'
     end_date = '2017-01-01'
     length = 10  # 参考周期长度，用于确定计算标准差及移动平均的周期
     open_trigger = 0.5  # 价格向上偏离均线0.5倍观察期内标准差的最大值开仓；
     stopwin_trigger = 3  # 价格向上偏离均线3倍观察期内标准差的最大值止盈；
     stoplose_trigger = 1  # 移动止损；跌破均值移动止损；固定止损：开仓价向下偏离观察期内标准差的最大值；
+    long_open_price = 0
+    long_open_delta = 0
     data = tushare_util.get_single_stock_data(code, start_date, end_date).reset_index()
 
     # 2- 策略数据处理
     data['pct_change'] = data['close'].pct_change()
     data['ma'] = data['close'].rolling(window=length, min_periods=3).mean()
-    data['std'] = data['close'].rolling(window=length, min_periods=3).mean()
+    data['std'] = data['close'].rolling(window=length, min_periods=3).std()
     data['yes_ma'] = data['ma'].shift(1)
     # 以观察期内标准差最大值作为标准差限制指标
     data['std_limit'] = data['std'].rolling(window=length).max() # 观察期内标准差最大值
@@ -58,6 +61,7 @@ def aberration_strategy():
     # 前12个数据因均值计算无效不作为待处理数据；
     # 终止数据选择倒数第二个以防止当天止盈利情况会以第二天开盘价平仓导致无数据情况发生；
     # 最后一天不进行操作；可能会面临最后一天开仓之后当天触发平仓，要用到下一天开盘价卖出，无法得到。
+    print(data[['date', 'long_open_signal', 'long_stopwin_signal', 'ma', 'yes_ma']].head())
     for i in range(12, (len(data) - 1)):
         # 有持仓进行平仓
         if flag == 1:
